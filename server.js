@@ -13,5 +13,4 @@
 require("babel-register");
 
 // Load server configuration
-import {app,port} from './server.conf.js';
-export {app,port};
+var app = require('./server.conf.js');
