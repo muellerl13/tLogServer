@@ -36,7 +36,7 @@ export default (app, router, passport) => {
   // routes
   let admin = (req, res, next) => {
 
-    if (!req.isAuthenticated() || req.user.role !== 'admin')
+    if (!req.isAuthenticated() || !req.user.roles.includes('admin'))
       res.send(401);
 
     else
