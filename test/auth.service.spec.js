@@ -9,6 +9,7 @@ import chai from 'chai';
 let should = chai.should();
 import chaiHttp from 'chai-http';
 import {port} from '../server.conf';
+import jwt from 'jsonwebtoken';
 
 import User from '../app/models/user.model';
 
@@ -55,6 +56,7 @@ describe('Authentication API',()=> {
         header.typ.should.equal("JWT");
         payload.username.should.equal("jesse");
         payload.email.should.equal("jj@test.com");
+        payload.roles.should.include.members(['user']);
         should.exist(payload.id);
         done();
       })
@@ -74,6 +76,7 @@ describe('Authentication API',()=> {
   });
 
   it('should support login', done => {
+
     createTestUser()
       .then(u => chai.request(serverInfo)
         .post('/api/auth/login')
@@ -85,11 +88,24 @@ describe('Authentication API',()=> {
           res.should.have.status(200);
           res.should.be.json;
           should.exist(res.body.token);
-          let [header,payload] = res.body.token.split('.').slice(0,2).map(v => JSON.parse(new Buffer(v,'base64').toString()));
+          const token = res.body.token;
+          const [header,payload] = token.split('.').slice(0,2).map(v => JSON.parse(new Buffer(v,'base64').toString()));
           header.typ.should.equal("JWT");
           payload.username.should.equal("johnny");
           payload.email.should.equal("jd@test.com");
           should.exist(payload.id);
+          const user = jwt.verify(token, process.env.SESSION_SECRET);
+          return chai.request(serverInfo)
+            .get('/api/auth/loggedIn')
+            .set('authorization', `Bearer ${token}`)
+        })
+        .then(res => {
+          res.should.have.status(200);
+          res.should.be.json;
+          let user = res.body;
+          user.username.should.equal("johnny");
+          user.email.should.equal("jd@test.com");
+          user.roles.should.include.members(['admin','user']);
           done();
         })
       )

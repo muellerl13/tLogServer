@@ -242,6 +242,8 @@ export default (passport) => {
           // Hash password with model method
           newUser.local.password = newUser.generateHash(password);
 
+          newUser.roles = ['user'];
+
           // Save the new user
           newUser.save().then((user) => done(null, user))
             .catch((err) => done(err,null,"Could not save new User!"));

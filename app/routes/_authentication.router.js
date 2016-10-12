@@ -31,12 +31,12 @@ import jwt from 'jsonwebtoken';
 let ObjectId = require('mongoose').Types.ObjectId;
 
 
-export default (app, router, passport, auth, admin) => {
+export default (app, router, passport, auth, admin, addUserFromToken) => {
 
   // ### Authentication API Routes
 
   // Route to test if the user is logged in or not
-  router.get('/auth/loggedIn', (req, res) => {
+  router.get('/auth/loggedIn', addUserFromToken, (req, res) => {
 
     // If the user is authenticated, return a user object
     // else return 0
@@ -82,7 +82,9 @@ export default (app, router, passport, auth, admin) => {
         res.json({ token: jwt.sign({
           id: req.user._id,
           username: req.user.local.username,
-          email: req.user.local.email}, process.env.SESSION_SECRET) });
+          email: req.user.local.email,
+          roles: req.user.roles
+        }, process.env.SESSION_SECRET) });
       });
 
     }) (req, res, next);
@@ -118,7 +120,8 @@ export default (app, router, passport, auth, admin) => {
       res.json({ token: jwt.sign({
         id: user._id,
         username: user.local.username,
-        email: user.local.email}, process.env.SESSION_SECRET) });
+        email: user.local.email,
+        roles: user.roles}, process.env.SESSION_SECRET) });
 
     }) (req, res, next);
   });

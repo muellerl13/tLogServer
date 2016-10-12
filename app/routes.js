@@ -14,6 +14,7 @@
 // Load our API routes for user authentication
 import authRoutes from './routes/_authentication.router.js';
 import ejwt from 'express-jwt';
+import jwt from 'jsonwebtoken';
 
 
 export default (app, router, passport) => {
@@ -28,9 +29,18 @@ export default (app, router, passport) => {
   });
 
   //Middleware for all routes that need authentication
-  let authenticate = ejwt({secret: process.env.SESSION_SECRET})
+  const authenticate = ejwt({secret: process.env.SESSION_SECRET})
 
-
+  const addUserFromToken = (req, res, next) => {
+    try {
+      const token = /Bearer (\w+?\.\w+?\.\S+)/.exec(req.header('authorization'))[1];
+      const user = jwt.verify(token, process.env.SESSION_SECRET)
+      req.user = user;
+      next();
+    } catch (err) {
+      next();
+    }
+  };
 
   // Define a middleware function to be used for all secured administration
   // routes
@@ -51,12 +61,12 @@ export default (app, router, passport) => {
 
   // Pass in our Express app and Router.
   // Also pass in auth & admin middleware and Passport instance
-  authRoutes(app, router, passport, authenticate, admin);
+  authRoutes(app, router, passport, authenticate, admin, addUserFromToken);
 
   // #### RESTful API Routes
 
-	// All of our routes will be prefixed with /api
-	app.use('/api', router);
+  // All of our routes will be prefixed with /api
+  app.use('/api', router);
 
   // ### Frontend Routes
 
@@ -65,6 +75,6 @@ export default (app, router, passport) => {
 
     // Load our src/app.html file
     //** Note that the root is set to the parent of this folder, ie the app root **
-    res.sendFile('/dist/index.html', { root: __dirname + "/../"});
+    res.sendFile('/dist/index.html', {root: __dirname + "/../"});
   });
 };
