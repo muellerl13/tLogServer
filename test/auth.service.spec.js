@@ -28,7 +28,7 @@ const createTestUser = () => {
   user.local.email = "jd@test.com";
   user.roles = ['admin','user'];
   return user.save();
-}
+};
 
 describe('Authentication API',()=> {
 

@@ -99,22 +99,6 @@ app.use(require("webpack-hot-middleware")(compiler, {
 }));
 
 
-/*
-switch (process.env.NODE_ENV) {
-  case 'prod':
-  case 'production':
-    webpackConfig = require('./config/webpack.prod')({env: 'production'});
-    break;
-  case 'test':
-  case 'testing':
-    webpackConfig = require('./config/webpack.test')({env: 'test'});
-    break;
-  case 'dev':
-  case 'development':
-  default:
-    webpackConfig = require('./config/webpack.dev')({env: 'development'});
-}*/
-
 // Read cookies (needed for authentication)
 app.use(cookieParser());
 

@@ -45,6 +45,7 @@
     "start": "npm run server:dev",
     "test": "karma start",
     "test:server": "NODE_ENV=test mocha",
+    "test:server:w": "NODE_ENV=test mocha -w",
     "tslint": "tslint",
     "typedoc": "typedoc",
     "version": "npm run build",
