@@ -26,4 +26,37 @@ export const all = (req, res, next) => {
   } catch(err) {
     res.json(500,{message:err.message})
   }
+};
+
+export const load = (req, res, next, id) => {
+  try {
+    POI.load(id)
+      .then(poi => {req.poi = poi; next()})
+      .catch(err => res.status(400).json({message: "This POI could not be found"}));
+  } catch(err) {
+    res.status(500).json({message:err.message})
+  }
+};
+
+export const show = (req,res) => res.json(req.poi);
+
+export const update = (req, res, next) => {
+  try {
+    const poi = Object.assign(req.poi,req.body);
+    poi.save()
+      .then(poi => POI.load(poi._id))
+      .then(poi => {req.poi = poi;next()})
+  } catch(err) {
+    res.status(500).json({message:err.message})
+  }
+};
+
+export const destroy = (req,res,next) => {
+  try {
+    req.poi.remove()
+      .then(()=>next())
+      .catch(err => res.status(500).json({message:"Could not delete this POI"}))
+  } catch(err) {
+    res.status(500).json({message:err.message})
+  }
 }

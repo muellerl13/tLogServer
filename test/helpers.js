@@ -7,12 +7,19 @@ import chaiHttp from 'chai-http';
 
 chai.use(chaiHttp);
 
-export const createTestUser = () => {
+const defaultUser = {
+  username: "johnny",
+  password: "topsecret",
+  email: "jd@test.com",
+  roles: ['admin','user']
+}
+
+export const createTestUser = (newUser = defaultUser) => {
   let user = new User();
-  user.local.username = "johnny";
-  user.local.password = user.generateHash("topsecret");
-  user.local.email = "jd@test.com";
-  user.roles = ['admin','user'];
+  user.local.username = newUser.username;
+  user.local.password = user.generateHash(newUser.password);
+  user.local.email = newUser.email;
+  user.roles = newUser.roles;
   return user.save();
 };
 
