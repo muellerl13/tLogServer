@@ -3,12 +3,12 @@
  */
 import POI from '../models/poi.model';
 
-export const create = (req,res) => {
+export const create = (req,res,next) => {
   const poi = new POI(req.body);
   poi.creator = req.user.id;
   poi.save()
     .then(poi => POI.load(poi._id))
-    .then( poi => res.json(poi))
+    .then( poi => {req.poi = poi; next()})
     .catch(err => res.json(400,{message:err.message}));
 };
 

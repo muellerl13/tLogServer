@@ -9,7 +9,7 @@ const isOwner = (req,res,next) =>
     res.status(401).json({message: "You are not allowed to change somebody else's POI"})
 
 export default (app, router, auth, admin) => {
-  router.post('/poi',auth,poi.create);
+  router.post('/poi',auth,poi.create,poi.show);
   router.get('/poi',auth,poi.all);
   router.param('poiId',poi.load);
   router.get('/poi/:poiId',auth,poi.show);

@@ -9,7 +9,7 @@ import chai from 'chai';
 let should = chai.should();
 import chaiHttp from 'chai-http';
 import {port} from '../server.conf';
-import {createTestUser, login} from './helpers';
+import {createTestUser, login, createSamplePOIs} from './helpers';
 
 import POI from '../app/models/poi.model';
 
@@ -23,28 +23,7 @@ let serverInfo = {
   }
 };
 
-/**
- * creates on single POI identified by nr
- * @param nr identifier of the POI
- * @param user creator of the POI
- * @returns A promise for the saved POI
- */
-const createSamplePOI = (nr,user) => new POI({
-  name: `POI ${nr}`,
-  description: `Description ${nr}`,
-  loc: {coordinates: [nr,nr]},
-  creator: user._id
-}).save();
 
-/**
- * Creates a series of POIs
- * @param nr number of POIs that should be created
- * @param user creator of the POIs
- * @returns A promise for an array of all created POIs
- */
-const createSamplePOIs =(nr,user) =>
-  Array.from(Array(nr).keys())
-    .reduce((promise,number) => promise.then(()=>createSamplePOI(number+1,user)),Promise.resolve([]))
 
 const fakeOwner = {
       username: "poiowner",
@@ -146,8 +125,8 @@ describe('POI API', ()=> {
     let poiToList = null;
     createTestUser()
       .then(user => createSamplePOIs(12,user))
-      .then((poi)=>{
-        poiToList = poi;
+      .then((pois)=>{
+        poiToList = pois[4];
         return login(serverInfo, 'johnny', 'topsecret')
       })
       .then(res =>
@@ -157,12 +136,12 @@ describe('POI API', ()=> {
       .then(res => {
         res.should.have.status(200);
         let poi = res.body;
-        poi.name.should.be.equal("POI 12");
-        poi.description.should.be.equal("Description 12");
+        poi.name.should.be.equal(poiToList.name);
+        poi.description.should.be.equal(poiToList.description);
         should.exist(poi._id);
         poi.loc.coordinates.should.be.an('array').and.have.lengthOf(2);
-        poi.loc.coordinates[0].should.be.equal(12).and.be.a.Number;
-        poi.loc.coordinates[1].should.be.equal(12).and.be.a.Number;
+        poi.loc.coordinates[0].should.be.equal(poiToList.loc.coordinates[0]).and.be.a.Number;
+        poi.loc.coordinates[1].should.be.equal(poiToList.loc.coordinates[1]).and.be.a.Number;
         should.exist(poi.creator);
         poi.creator.local.username.should.be.equal("johnny");
         done()
@@ -184,9 +163,9 @@ describe('POI API', ()=> {
     let poiToList = null;
     createTestUser()
       .then(user => createSamplePOIs(12,user))
-      .then(poi =>
+      .then(pois =>
         chai.request(serverInfo)
-          .get(`/api/poi/${poi._id}`))
+          .get(`/api/poi/${pois[6]._id}`))
       .then(res =>
         done(new Error("This should not be allowed!"))
       ).catch((err) => {
@@ -199,8 +178,8 @@ describe('POI API', ()=> {
     let poiToList = null;
     createTestUser()
       .then(user => createSamplePOIs(12,user))
-      .then((poi)=>{
-        poiToList = poi;
+      .then((pois)=>{
+        poiToList = pois[3];
         return login(serverInfo, 'johnny', 'topsecret')
       })
       .then(res =>
@@ -212,11 +191,11 @@ describe('POI API', ()=> {
         res.should.have.status(200);
         let poi = res.body;
         poi.name.should.be.equal("POI Updated");
-        poi.description.should.be.equal("Description 12");
+        poi.description.should.be.equal(poiToList.description);
         should.exist(poi._id);
         poi.loc.coordinates.should.be.an('array').and.have.lengthOf(2);
-        poi.loc.coordinates[0].should.be.equal(12).and.be.a.Number;
-        poi.loc.coordinates[1].should.be.equal(12).and.be.a.Number;
+        poi.loc.coordinates[0].should.be.equal(poiToList.loc.coordinates[0]).and.be.a.Number;
+        poi.loc.coordinates[1].should.be.equal(poiToList.loc.coordinates[1]).and.be.a.Number;
         should.exist(poi.creator);
         poi.creator.local.username.should.be.equal("johnny");
         done()
@@ -228,8 +207,8 @@ describe('POI API', ()=> {
     createTestUser(fakeOwner)
       .then(() => createTestUser())
       .then(user => createSamplePOIs(12,user))
-      .then((poi)=>{
-        poiToList = poi;
+      .then((pois)=>{
+        poiToList = pois[11];
         return login(serverInfo, fakeOwner.username, fakeOwner.password)
       })
       .then(res =>
@@ -250,8 +229,8 @@ describe('POI API', ()=> {
     let poiToDelete = null;
     createTestUser()
       .then(user => createSamplePOIs(12,user))
-      .then((poi)=>{
-        poiToDelete = poi;
+      .then((pois)=>{
+        poiToDelete = pois[11];
         return login(serverInfo, 'johnny', 'topsecret')
       })
       .then(res =>
@@ -280,8 +259,8 @@ describe('POI API', ()=> {
     createTestUser(fakeOwner)
       .then(() => createTestUser())
       .then(user => createSamplePOIs(12,user))
-      .then((poi)=>{
-        poiToDelete = poi;
+      .then((pois)=>{
+        poiToDelete = pois[3];
         return login(serverInfo, fakeOwner.username, fakeOwner.password)
       })
       .then(res =>
