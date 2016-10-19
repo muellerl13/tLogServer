@@ -11,7 +11,9 @@ import chaiHttp from 'chai-http';
 import {port} from '../server.conf';
 import {createTestUser, login, createSamplePOIs, createSampleTrips, standardUser, adminUser} from './helpers';
 
-import POI from '../app/models/poi.model';
+
+
+import Trip from '../app/models/trip.model';
 
 chai.use(chaiHttp);
 
@@ -204,9 +206,88 @@ describe("Trip API", () => {
       )
       .then(res => done(new Error("It should not be possible to add a poi to another user's trip")))
       .catch((err) =>{
-        err.should.have.status(401);
+        err.should.have.status(403);
         done();
       })
+  });
+
+  it("should be possible to delete your own trips along with all POI's", done =>{
+    let tripToDelete = null;
+    createTestUser(standardUser)
+      .then(user => createSampleTrips(3,user))
+      .then(trips => {tripToDelete=trips[0];return login(serverInfo, standardUser.username, standardUser.password);})
+      .then(res =>chai.request(serverInfo)
+        .delete(`/api/trip/${tripToDelete._id}`)
+        .set('authorization', `Bearer ${res.body.token}`)
+      )
+      .then(res => {
+        res.should.have.status(200);
+        return Trip.findOne({_id: tripToDelete._id})
+      })
+      .then(trip => {
+        should.not.exist(trip);
+        done();
+      })
+      .catch(err => done(err));
+  });
+
+  it("should not be possible to delete somebody else's trips", done =>{
+    let tripToDelete = null;
+    createTestUser(adminUser)
+      .then(user => createSampleTrips(3,user))
+      .then(trips => tripToDelete=trips[2])
+      .then(() => createTestUser(standardUser))
+      .then(() => login(serverInfo, standardUser.username, standardUser.password))
+      .then(res =>chai.request(serverInfo)
+        .delete(`/api/trip/${tripToDelete._id}`)
+        .set('authorization', `Bearer ${res.body.token}`)
+      )
+      .then(res => {
+        done(new Error("it should not be possible to delete somebody else`s trip"));
+      })
+      .catch(err => {
+        err.should.have.status(403);
+        done();
+      });
+  });
+
+  it("should not be possible to delete somebody else's trip except the current user is an administrator", done =>{
+    let tripToDelete = null;
+    createTestUser(standardUser)
+      .then(user => createSampleTrips(3,user))
+      .then(trips => tripToDelete=trips[0])
+      .then(()=> createTestUser(adminUser))
+      .then(user => login(serverInfo, adminUser.username, adminUser.password))
+      .then(res =>chai.request(serverInfo)
+        .delete(`/api/trip/${tripToDelete._id}`)
+        .set('authorization', `Bearer ${res.body.token}`)
+      )
+      .then(res => {
+        res.should.have.status(200);
+        return Trip.findOne({_id: tripToDelete._id})
+      })
+      .then(trip => {
+        should.not.exist(trip);
+        done();
+      })
+      .catch(err => done(err));
+  });
+
+  it("should be possible to get the total number of trips", done=>{
+    createTestUser(adminUser)
+      .then(user => createSampleTrips(8,user))
+      .then(trips => createTestUser(standardUser))
+      .then(user => createSampleTrips(6,user))
+      .then(()=>login(serverInfo,standardUser.username,standardUser.password))
+      .then(res =>chai.request(serverInfo)
+        .get(`/api/trip/count`)
+        .set('authorization', `Bearer ${res.body.token}`)
+      ).then(res => {
+        const numberOfTrips = parseInt(res.body);
+        numberOfTrips.should.be.equal(14);
+        done();
+    })
+      .catch(done);
   });
 
 });

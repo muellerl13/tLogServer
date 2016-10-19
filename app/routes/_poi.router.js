@@ -6,7 +6,7 @@ import * as poi from '../controllers/poi.controller';
 const isOwner = (req,res,next) =>
   req.poi.creator.local.username === req.user.username || req.user.roles.includes('admin') ?
     next():
-    res.status(401).json({message: "You are not allowed to change somebody else's POI"})
+    res.status(403).json({message: "You are not allowed to change somebody else's POI"})
 
 export default (app, router, auth, admin) => {
   router.post('/poi',auth,poi.create,poi.show);

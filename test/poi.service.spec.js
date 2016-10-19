@@ -219,7 +219,7 @@ describe('POI API', ()=> {
       .then(res => {
         done(new Error("This should not be allowed!"));
       }).catch((err) => {
-        err.should.have.status(401);
+        err.should.have.status(403);
         err.response.body.message.should.be.equal("You are not allowed to change somebody else's POI");
         done();
     });
@@ -271,11 +271,13 @@ describe('POI API', ()=> {
       .then(res => {
         done(new Error("This should not be allowed!"));
       }).catch((err) => {
-      err.should.have.status(401);
+      err.should.have.status(403);
       err.response.body.message.should.be.equal("You are not allowed to change somebody else's POI");
       done();
     });
   });
+
+
 
 
 });

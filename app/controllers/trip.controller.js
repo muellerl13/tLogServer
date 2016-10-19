@@ -58,3 +58,20 @@ export const addPOI = (req,res,next) =>{
       .catch(err => res.status(400).json({message: err.message}))
   } catch(err) {res.status(500).json({message: err.message})}
 };
+
+export const remove = (req,res,next) =>{
+  try {
+    Promise.all(req.trip.pois.map(poi=>poi.remove()))
+      .then(req.trip.remove())
+      .then(trip => res.status(200).json({message: `Trip was successfully deleted!`}))
+      .catch(err => res.status(400).json({message: err.message}))
+  } catch(err) {res.status(500).json({message: err.message})}
+};
+
+export const count = (req,res,next) =>{
+  try {
+    Trip.count({})
+      .then(count => res.json(count))
+      .catch(err => res.status(400).json({message: err.message}))
+  } catch(err) {res.status(500).json({message: err.message})}
+};
