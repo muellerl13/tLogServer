@@ -77,9 +77,13 @@ export const destroy = (req, res, next) => {
 };
 
 export const image = (req, res) => {
-  id = req.params.imageId;
-  ObjectID = mongoose.mongo.ObjectID;
-  gfs.createReadStream({_id: new ObjectID(id)}).pipe(res)
+  try {
+    id = req.params.imageId;
+    ObjectID = mongoose.mongo.ObjectID;
+    gfs.createReadStream({_id: new ObjectID(id)}).pipe(res);
+  } catch(err) {
+    res.status(500).json({message: err.message})
+  }
 };
 
 export const addImage = function (req, res) {
@@ -102,8 +106,7 @@ export const addImage = function (req, res) {
         creator: req.user.id
       }
     });
-    //const s = gm(file.path).resize(maxDimension).stream().pipe(wStream);
-    const s = fs.createReadStream(file.path).pipe(wStream);
+    const s = gm(file.path).resize(maxDimension).stream().pipe(wStream);
     s.on('close', file => {
       const poi = req.poi;
       poi.images.push({
@@ -118,7 +121,7 @@ export const addImage = function (req, res) {
           message: "Could not add image to POI " + err.message
         }));
     });
-    return s.on('error',  error => {
+    s.on('error',  error => {
       res.status(500).send({
         message: "Could not save image"
       });
