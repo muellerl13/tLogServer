@@ -9,7 +9,8 @@ import chai from 'chai';
 let should = chai.should();
 import chaiHttp from 'chai-http';
 import {port} from '../server.conf';
-import {createTestUser, login, createSamplePOIs} from './helpers';
+import {createTestUser, login, createSamplePOIs, standardUser} from './helpers';
+import fs from "fs";
 
 import POI from '../app/models/poi.model';
 
@@ -277,6 +278,37 @@ describe('POI API', ()=> {
     });
   });
 
+  it("should support adding images to POIs", done => {
+    let poiToAddImage = null;
+    let owner = null;
+    createTestUser(standardUser)
+      .then(user => {owner = user; return createSamplePOIs(1,owner)})
+      .then(pois => {poiToAddImage = pois[0]; return login(serverInfo,standardUser.username,standardUser.password)})
+      .then(res => chai.request(serverInfo)
+        .post(`/api/poi/${poiToAddImage._id}/image`)
+        .set('authorization', `Bearer ${res.body.token}`)
+        .field("description","A Test Image")
+        .attach('file',fs.createReadStream('test/images/test.png'))
+      )
+      .then(res => {
+        res.should.have.status(200);
+        const imgData = res.body;
+        imgData.filename.should.be.equal('test.png');
+        imgData.contentType.should.be.equal('image/png');
+        imgData.metadata.poi.should.be.equal(poiToAddImage._id.toString());
+        imgData.metadata.creator.should.be.equal(owner._id.toString());
+        }
+      )
+      .then(() => POI.load(poiToAddImage._id))
+      .then(poi => {
+        poi.images.should.be.an('array');
+        poi.images.should.have.lengthOf(1);
+        const testImage = poi.images[0];
+        testImage.description.should.be.equal("A Test Image");
+        done();
+      })
+      .catch(done)
+  });
 
 
 

@@ -29,8 +29,7 @@ const poiSchema = Schema({
   createdAt: {
     type: Date,
     "default": Date.now
-  }/*,
-
+  },
   images: [
     {
       id: Schema.Types.ObjectId,
@@ -41,7 +40,7 @@ const poiSchema = Schema({
       },
       user: String
     }
-  ]*/
+  ]
 });
 
 poiSchema.index({

@@ -2,6 +2,8 @@
  * Created by salho on 13.10.16.
  */
 import * as poi from '../controllers/poi.controller';
+import multipart from 'connect-multiparty';
+const multipartMiddleware = multipart();
 
 const isOwner = (req,res,next) =>
   req.poi.creator.local.username === req.user.username || req.user.roles.includes('admin') ?
@@ -15,4 +17,5 @@ export default (app, router, auth, admin) => {
   router.get('/poi/:poiId',auth,poi.show);
   router.patch('/poi/:poiId',auth,isOwner,poi.update,poi.show);
   router.delete('/poi/:poiId',auth,isOwner,poi.destroy,poi.show);
+  router.post('/poi/:poiId/image',auth,multipartMiddleware,poi.addImage);
 }
