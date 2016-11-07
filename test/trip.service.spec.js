@@ -317,4 +317,29 @@ describe("Trip API", () => {
 
   });
 
+  it('should not be possible to update somebody elses trips', done => {
+    const now = Date.now();
+    let tripToChange = null;
+    createTestUser(adminUser)
+      .then(()=>createTestUser(standardUser))
+      .then(user => createSampleTrips(2,user))
+      .then(trips => {
+        tripToChange = trips[0];
+        tripToChange.name = "Name Changed";
+        tripToChange.end = now;
+      })
+      .then(() => login(serverInfo,adminUser.username,adminUser.password))
+      .then(res => chai.request(serverInfo)
+        .patch(`/api/trip/${tripToChange._id}`)
+        .set('authorization', `Bearer ${res.body.token}`)
+        .send(tripToChange))
+      .then(res => done(new Error("This should be possible"))
+      )
+      .catch(err => {
+        err.status.should.be.equal(403);
+        err.response.body.message.should.be.equal("You are not allowed to change somebody else's trip");
+        done();
+      })
+  });
+
 });
