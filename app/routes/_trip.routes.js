@@ -14,6 +14,7 @@ const tripOwnerOrAdminCondition = req => tripOwnerCondition(req) || req.user.rol
 
 export default (app, router, auth, admin) => {
   router.post('/trip/addpoi/:tripId',auth,checkPermission(tripOwnerCondition),poi.create,trip.addPOI,trip.show);
+  router.patch('/trip/:tripId',auth,checkPermission(tripOwnerCondition),trip.update,trip.show);
   router.post('/trip',auth,trip.create,trip.show);
   router.get('/trip',auth,trip.list);
   router.param('tripId',trip.load);
@@ -21,5 +22,4 @@ export default (app, router, auth, admin) => {
   router.get('/trip/count',auth,trip.count);
   router.delete('/trip/:tripId',auth,checkPermission(tripOwnerOrAdminCondition),trip.remove);
   router.get('/trip/:tripId',trip.show);
-
 }

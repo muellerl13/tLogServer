@@ -290,4 +290,31 @@ describe("Trip API", () => {
       .catch(done);
   });
 
+
+  it('should be possible to update an existing trip', done => {
+    const now = Date.now();
+    let tripToChange = null;
+    createTestUser(standardUser)
+      .then(user => createSampleTrips(2,user))
+      .then(trips => {
+        tripToChange = trips[0];
+        tripToChange.name = "Name Changed";
+        tripToChange.end = now;
+      })
+      .then(() => login(serverInfo,standardUser.username,standardUser.password))
+      .then(res => chai.request(serverInfo)
+        .patch(`/api/trip/${tripToChange._id}`)
+        .set('authorization', `Bearer ${res.body.token}`)
+        .send(tripToChange))
+      .then(() => Trip.load(tripToChange._id))
+      .then(trip => {
+        trip.name.should.be.equal("Name Changed");
+        should.exist(trip.end);
+        trip.end.getTime().should.be.equal(now);
+        done();
+      })
+      .catch(done)
+
+  });
+
 });
