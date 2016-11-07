@@ -78,7 +78,7 @@ export const count = (req,res,next) =>{
 
 export const update = (req,res,next) => {
   try {
-  if (req.trip._id.toString() !== req.body._id) {
+  if (req.body._id && req.trip._id.toString() !== req.body._id) {
     res.status(400).json({message: 'Wrong trip id'});
   } else {
     const trip = Object.assign(req.trip,req.body);
