@@ -12,7 +12,9 @@ export const show = (req,res) => {
 
 export const create = (req,res,next) => {
   try {
-    new Trip(req.body).save()
+    let trip = new Trip(req.body);
+    trip.creator = req.user.id;
+    trip.save()
       .then(trip => Trip.load(trip._id))
       .then((trip)=>{req.trip = trip; next()})
       .catch(err => res.status(400).json({message: `Could not create this Trip: ${err.message}`}))
