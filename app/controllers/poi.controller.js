@@ -18,7 +18,7 @@ export const create = (req, res, next) => {
       req.poi = poi;
       next()
     })
-    .catch(err => res.json(400, {message: err.message}));
+    .catch(err => res.status(400).json({message: err.message}));
 };
 
 export const all = (req, res, next) => {
@@ -31,9 +31,9 @@ export const all = (req, res, next) => {
       .limit(size)
       .populate('creator', 'local.username')
       .then((data) => res.json(data))
-      .catch(err => res.json(500, {message: err.message}))
+      .catch(err => res.status(500).json({message: err.message}))
   } catch (err) {
-    res.json(500, {message: err.message})
+    res.status(500).json({message: err.message})
   }
 };
 
