@@ -61,6 +61,7 @@ export const update = (req, res, next) => {
         req.poi = poi;
         next()
       })
+      .catch(err => res.status(400).json({message: "This POI could not be updated: "+ err.message}));
   } catch (err) {
     res.status(500).json({message: err.message})
   }
@@ -133,4 +134,6 @@ export const addImage = function (req, res) {
     });
   }
 };
+
+
 

@@ -13,6 +13,7 @@ const isOwner = (req,res,next) =>
 export default (app, router, auth, admin) => {
   router.post('/poi',auth,poi.create,poi.show);
   router.get('/poi',auth,poi.all);
+  router.get('/poi/image/:imageId',auth,poi.image);
   router.param('poiId',poi.load);
   router.get('/poi/:poiId',auth,poi.show);
   router.patch('/poi/:poiId',auth,isOwner,poi.update,poi.show);
