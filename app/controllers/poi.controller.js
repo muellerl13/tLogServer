@@ -37,6 +37,14 @@ export const all = (req, res, next) => {
   }
 };
 
+export const mine = (req,res,next) =>{
+  try {
+    POI.find({creator: req.user.id}).sort("-createdAt").populate('creator', 'local.username')
+      .then(pois => res.json(pois))
+  .catch(err => res.status(400).json({message: err.message}))
+  } catch(err) {res.status(500).json({message: err.message})}
+};
+
 export const load = (req, res, next, id) => {
   try {
     POI.load(id)
