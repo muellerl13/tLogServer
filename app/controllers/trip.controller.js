@@ -61,6 +61,27 @@ export const addPOI = (req,res,next) =>{
   } catch(err) {res.status(500).json({message: err.message})}
 };
 
+export const likeOrDislike = (req,res,next) =>{
+  try{
+    let trip = req.trip;
+    let likeTrip = trip.likes.map(user => String(user.userid).indexOf(req.user.id));
+    if(likeTrip != -1){
+      trip.likes.splice(likeTrip, 1)
+    } else {
+      trip.likes.push({
+        userid:req.user.id,
+        username: req.user.username
+      });
+    }
+    trip.save()
+      .then(updatedTrip => Trip.load(updatedTrip._id))
+      .then(updatedTrip => {req.trip = updatedTrip; next()})
+      .catch(err => res.status(400).json({message: "The Trip could not be liked/unliked: "+ err.message}));
+  }catch(err){
+    res.status(500).json({message: err.message})
+  }
+}
+
 export const remove = (req,res,next) =>{
   try {
     Promise.all(req.trip.pois.map(poi=>poi.remove()))
