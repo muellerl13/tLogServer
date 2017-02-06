@@ -51,6 +51,7 @@ userSchema.methods.validPassword = function(password) {
 export default mongoose.model('User', userSchema);
 
 userSchema.statics.load = function(id) {
+  console.log("In user model load function");
   return this.findOne({
     _id: id
   })
