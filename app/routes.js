@@ -15,6 +15,7 @@
 import authRoutes from './routes/_authentication.router.js';
 import poiRoutes from './routes/_poi.router';
 import tripRoutes from './routes/_trip.routes';
+import userRoutes from './routes/_user.router';
 import ejwt from 'express-jwt';
 import jwt from 'jsonwebtoken';
 
@@ -66,6 +67,7 @@ export default (app, router, passport) => {
   authRoutes(app, router, passport, authenticate, admin, addUserFromToken);
   poiRoutes(app,router,authenticate,admin);
   tripRoutes(app,router,authenticate,admin);
+  userRoutes(app,router,authenticate,admin);
 
   // #### RESTful API Routes
 
