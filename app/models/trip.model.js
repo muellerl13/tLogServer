@@ -58,7 +58,7 @@ TripSchema.path('creator').validate(function(creator) {
 }, 'Creator must be specified');
 
 TripSchema.statics.load = function(id) {
-  return this.findById(id).populate('creator', 'local.username _id').populate('pois');
+  return this.findById(id).populate('creator', 'local.username _id').populate('pois').populate('comments');
 };
 
 export default mongoose.model('Trip',TripSchema);
