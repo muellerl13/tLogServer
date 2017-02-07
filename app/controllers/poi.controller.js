@@ -136,7 +136,7 @@ export const filterImage = (req,res, next) => {
     if(req.body.filterType == "gray"){
      const stream = gm(gfs.createReadStream({_id: new ObjectID(id)})).channel("gray").stream().pipe(wStream);
       stream.on('close', file => {
-       let poi = req.poi;
+        let poi = req.poi;
         poi.images.push({
           description: req.body.description,
           id: file._id,
