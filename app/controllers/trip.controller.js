@@ -3,6 +3,7 @@
  */
 
 import Trip from '../models/trip.model';
+import User from '../models/user.model';
 
 export const show = (req,res) => {
   try {
@@ -78,19 +79,77 @@ export const likeOrDislike = (req, res, next) => {
     }
     if (index != -1) {
       trip.likes.splice(index, 1);
+      User.findOne({
+        _id: trip.creator._id
+      })
+        .then(user => {
+          console.log("In load function then");
+          //if (user.newLike == undefined) {
+          //  user.newLike = [];
+          //}
+          //console.log(user.newLike);
+          console.log(trip._id);
+          user.newLike = user.newLike.filter((item)=>String(item.tripId)!=String(trip._id));
+          //let newnewLike =
+            //user.newLike = newnewLike;
+          user.save()
+            .then((user3) => {
+              //console.log(user3.newLike);
+              trip.save()
+              .then(trip => Trip.load(trip._id))
+              .then(trip => {
+                req.trip = trip;
+                next();
+              })
+              .catch(err => res.status(400).json({message: "The Trip could not be liked/unliked: "+ err.message}));
+            })
+            .catch(err => res.status(400).json({message: "The user like could not be saved: "+ err.message}));
+
+        })
+        .catch(err => {
+          console.log("In load function catch");
+          res.status(400).json({message: "catch 1"})
+        });
     } else {
       trip.likes.push({
         userId: req.user.id,
         username: req.user.username
       });
-    }
-    trip.save()
-      .then(trip => Trip.load(trip._id))
-      .then(trip => {
-        req.trip = trip;
-        next();
+
+      User.findOne({
+        _id: trip.creator._id
       })
-      .catch(err => res.status(400).json({message: "The Trip could not be liked/unliked: "+ err.message}));
+        .then(user => {
+          console.log(user.newLike);
+          console.log("In load function then");
+          //if (user.newLike == undefined) {
+          //  user.newLike = [];
+          //}
+          user.newLike.push({
+            tripId: req.trip._id,
+            tripname: req.trip.name
+          });
+          user.save()
+            .then((user2) => {
+              //console.log(user2.newLike);
+              trip.save()
+              .then(trip => Trip.load(trip._id))
+              .then(trip => {
+                req.trip = trip;
+                next();
+              })
+              .catch(err => res.status(400).json({message: "The Trip could not be liked/unliked: "+ err.message}))
+            })
+            .catch(err => res.status(400).json({message: "The user like could not be saved: "+ err.message}));
+
+        })
+        .catch(err => {
+          console.log("In load function catch");
+          res.status(400).json({message: "catch 2"})
+        });
+    }
+
+
   } catch (err) {
     res.status(500).json({message: err.message})
   }
