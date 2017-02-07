@@ -31,7 +31,7 @@ const TripSchema = new Schema({
   ],
   likes: [
     {
-      userid: Schema.Types.ObjectId,
+      userId: Schema.Types.ObjectId,
       username: String
     }
   ],
