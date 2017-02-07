@@ -14,6 +14,7 @@
 // Grab the Mongoose module
 import mongoose from 'mongoose';
 mongoose.Promise = global.Promise;
+let Schema = mongoose.Schema;
 
 // Import library to hash passwords
 import bcrypt from 'bcrypt-nodejs';
