@@ -6,6 +6,12 @@ import Trip from '../models/trip.model';
 
 export const show = (req,res) => {
   try {
+    req.trip.liked = false;
+    for(let i = 0; i < req.trip.likes.length; i++){
+      if(String(req.trip.likes[i].userId) == String(req.user.id)){
+        req.trip.liked = true;
+      }
+    }
     res.json(req.trip);
   } catch(err) {res.status(500).json({message: `Could not send this Trip: ${err.message}`})}
 };
@@ -30,7 +36,7 @@ export const list = (req,res,next) => {
       .skip(page * size)
       .limit(size)
       .populate('creator', 'local.username')
-      .then((data) => res.json(data))
+      .then(data => res.json(liked(data,req)))
       .catch(err => res.json(500,{message:err.message}))
   } catch(err) {res.status(500).json({message: `Could not list Trips: ${err.message}`})}
 };
@@ -46,7 +52,7 @@ export const load = (req,res,next,id) =>{
 export const mine = (req,res,next) =>{
   try {
     Trip.find({creator: req.user.id}).sort("-createdAt").populate('creator', 'local.username')
-      .then(trips => res.json(trips))
+      .then(trips => res.json(liked(trips,req)))
       .catch(err => res.status(400).json({message: err.message}))
   } catch(err) {res.status(500).json({message: err.message})}
 };
@@ -59,6 +65,20 @@ export const addPOI = (req,res,next) =>{
       .then(trip => {req.trip=trip; next()})
       .catch(err => res.status(400).json({message: err.message}))
   } catch(err) {res.status(500).json({message: err.message})}
+};
+
+export const liked = (trips,req) =>{
+  let newTrips = [];
+  trips.forEach(trip => {
+    trip.liked = false;
+    for(let i = 0; i < trip.likes.length; i++){
+      if(String(trip.likes[i].userId) == String(req.user.id)){
+        trip.liked = true;
+      }
+    }
+    newTrips.push(trip);
+  });
+  return newTrips;
 };
 
 export const likeOrDislike = (req, res, next) => {
@@ -94,6 +114,14 @@ export const likeOrDislike = (req, res, next) => {
   } catch (err) {
     res.status(500).json({message: err.message})
   }
+};
+
+export const all = (req,res,next) =>{
+  try {
+    Trip.find({}).sort("-createdAt")
+      .then(trips => res.json(liked(trips,req)))
+      .catch(err => res.status(400).json({message: err.message}))
+  } catch(err) {res.status(500).json({message: err.message})}
 };
 
 export const comment = (req,res,next) =>{
