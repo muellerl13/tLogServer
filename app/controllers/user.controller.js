@@ -46,3 +46,18 @@ export const load = (req, res, next, id) => {
     res.status(500).json({message: err.message})
   }
 };
+
+export const notifications = (req, res) => {
+
+  console.log("In notification function")
+  try {
+    let output = req.userN.newLike;
+
+    req.userN.newLike=[];
+    req.userN.save().then(() => res.json(output))
+      .catch((err) => {res.status(500).json({message: err.message})})
+
+
+  } catch(err) {res.status(500).json({message: err.message})}
+
+};

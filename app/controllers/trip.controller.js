@@ -32,7 +32,7 @@ export const create = (req,res,next) => {
 export const list = (req,res,next) => {
   try {
     let page = parseInt(req.query.page || '0');
-    let size = parseInt(req.query.size || '10');
+    let size = parseInt(req.query.size || '100');
     Trip.find()
       .sort('-createdAt')
       .skip(page * size)

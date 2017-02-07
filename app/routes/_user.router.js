@@ -10,5 +10,6 @@ export default (app, router, auth, admin) => {
 
   router.param('userId',user.load);
   router.patch('/user/:userId',auth, user.update,user.show);
+  router.get('/user/notifications/:userId/', auth, user.notifications)
 
 }
