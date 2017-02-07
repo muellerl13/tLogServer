@@ -107,7 +107,7 @@ export const update = (req,res,next) => {
     const trip = Object.assign(req.trip,req.body);
     trip.save()
       .then(trip => Trip.load(trip._id))
-      .then(trips => {req.trip = trip;next();})
+      .then(trip => {req.trip = trip;next();})
       .catch(err => res.status(400).json({message: err.message}))
   }
   } catch(err) {res.status(500).json({message: err.message})}
