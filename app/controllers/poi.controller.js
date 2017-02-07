@@ -47,7 +47,6 @@ export const mine = (req,res,next) =>{
 
 export const load = (req, res, next, id) => {
   try {
-    console.log(req);
     POI.load(id)
       .then(poi => {
         req.poi = poi;
@@ -97,6 +96,33 @@ export const image = (req, res) => {
   }
 };
 
+export const deleteImage = (req,res,next) =>{
+  const gfs = grid(mongoose.connection.db);
+  const id = req.params.imageId;
+  let ObjectID = mongoose.mongo.ObjectID;
+  gfs.remove({_id: new ObjectID(id)}, function (err) {
+    if (err){
+      console.log('error deleting')
+     return handleError(err);}
+    console.log('delete successful');
+  });
+  const poi = req.poi;
+  let newImageArray = [];
+  for(let i = 0; i < poi.images.length; i++){
+    if(poi.images[i].id != id){
+      newImageArray.push(poi.images[i])
+    }
+  }
+  poi.images = newImageArray;
+  poi.save()
+    .then(poi => POI.load(poi._id))
+    .then(poi => res.json(poi))
+    .catch(err => res.status(500).send({
+      message: "Could not delete image" + err.message
+    }));
+
+};
+
 export const filterImage = (req,res, next) => {
   try{
     const gfs = grid(mongoose.connection.db);
@@ -110,7 +136,7 @@ export const filterImage = (req,res, next) => {
     if(req.body.filterType == "gray"){
      const stream = gm(gfs.createReadStream({_id: new ObjectID(id)})).channel("gray").stream().pipe(wStream);
       stream.on('close', file => {
-        poi = req.poi;
+       let poi = req.poi;
         poi.images.push({
           description: req.body.description,
           id: file._id,
