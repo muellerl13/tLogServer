@@ -47,6 +47,7 @@ export const mine = (req,res,next) =>{
 
 export const load = (req, res, next, id) => {
   try {
+    console.log(req);
     POI.load(id)
       .then(poi => {
         req.poi = poi;
@@ -87,12 +88,55 @@ export const destroy = (req, res, next) => {
 
 export const image = (req, res) => {
   try {
-    id = req.params.imageId;
-    ObjectID = mongoose.mongo.ObjectID;
-    gfs.createReadStream({_id: new ObjectID(id)}).pipe(res);
-  } catch(err) {
+    const gfs = grid(mongoose.connection.db);
+    console.log("id=" + req.params.imageId);
+    let ObjectID = mongoose.mongo.ObjectID;
+    gfs.createReadStream({_id: new ObjectID(req.params.imageId)}).pipe(res);
+  } catch (err) {
     res.status(500).json({message: err.message})
   }
+};
+
+export const filterImage = (req,res, next) => {
+  try{
+    const gfs = grid(mongoose.connection.db);
+    let poi = req.poi;
+    const id = req.body.imageId;
+    let ObjectID = mongoose.mongo.ObjectID;
+    const wStream = gfs.createWriteStream({
+      filename:'filteredImage',
+    });
+
+    if(req.body.filterType == "gray"){
+     const stream = gm(gfs.createReadStream({_id: new ObjectID(id)})).channel("gray").stream().pipe(wStream);
+      stream.on('close', file => {
+        poi = req.poi;
+        poi.images.push({
+          description: req.body.description,
+          id: file._id,
+          uploaded: Date.now(),
+          user: req.user.username
+        });
+        stream.on('error',  error => {
+          res.status(500).send({
+            message: "Could not save filtered image"
+          });
+        });
+        poi.save()
+          .then(poi => POI.load(poi._id))
+          .then(poi => res.json(poi))
+          .catch(err => res.status(500).send({
+            message: "Could not filter image to and save it " + err.message
+          }));
+      });
+    }
+    next()
+
+  } catch (err){
+    res.status(500).json({message: "Could not filter image: "+ err.message})
+  }
+
+
 };
 
 export const addImage = function (req, res) {
