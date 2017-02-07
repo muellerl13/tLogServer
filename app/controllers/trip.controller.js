@@ -63,14 +63,24 @@ export const addPOI = (req,res,next) =>{
 
 export const likeOrDislike = (req, res, next) => {
   try {
-    console.log("!!!!!! " + req.params.userId);
     const trip = req.trip;
-    const index = trip.likes.map(e => String(e.userId)).indexOf(req.user.id);
+    let index = -1;
+
+    //const index = trip.likes.map(e => {
+    //  String(e.userId)
+    //}).indexOf(String(req.user.id));
+
+    for (let i = 0, len = trip.likes.length; i < len; i++) {
+
+      if(String(trip.likes[i].userId)==String(req.user.id)){
+        index = i;
+      }
+    }
     if (index != -1) {
       trip.likes.splice(index, 1);
     } else {
       trip.likes.push({
-        userid: req.user.id,
+        userId: req.user.id,
         username: req.user.username
       });
     }
