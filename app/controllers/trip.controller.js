@@ -4,6 +4,7 @@
 
 import Trip from '../models/trip.model';
 import User from '../models/user.model';
+import Comment from '../models/comment.model'
 
 export const show = (req,res) => {
   try {
@@ -186,12 +187,13 @@ export const all = (req,res,next) =>{
 export const comment = (req,res,next) =>{
   try{
     let trip = req.trip;
-    let comment = new Comment(req.body)
-    trip.comments.push(comment)
-    //trip.
-    trip.save()
-      .then(updatedTrip => Trip.load(updatedTrip._id))
-      .then(updatedTrip => {req.trip = updatedTrip; next()})
+    let comment = new Comment();
+    comment.content = req.body.content;
+    comment.creator = req.body.user;
+    comment.save().then(comment => {trip.comments.push(comment);
+      trip.save()
+        .then(updatedTrip => Trip.load(updatedTrip._id))
+        .then(updatedTrip => {req.trip = updatedTrip; next()})})
       .catch(err => res.status(400).json({message: "The Trip could not be commented on: "+ err.message}));
   }catch(err){
     res.status(500).json({message: err.message})
