@@ -30,21 +30,19 @@ let userSchema = mongoose.Schema({
 
     email : { type : String, unique : true },
 
-    newComment: [
+    /*newComment: [
       {
         type: Schema.Types.ObjectId,
         ref: 'Trip'
       }
-    ],
-
-    newLike: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: 'Trip'
-      }
-    ]
+    ],*/
   },
-
+  newLike: [
+    {
+      tripId: Schema.Types.ObjectId,
+      tripname: String
+    }
+  ],
   roles : { type : [String] }
 });
 
