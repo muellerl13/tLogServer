@@ -97,7 +97,7 @@ export const image = (req, res) => {
   }
 };
 
-export const filterImage = (req,res, next) => {
+export const filterImage = (req,res) => {
   try{
     const gfs = grid(mongoose.connection.db);
     let poi = req.poi;
@@ -130,7 +130,7 @@ export const filterImage = (req,res, next) => {
           }));
       });
     }
-    next()
+
 
   } catch (err){
     res.status(500).json({message: "Could not filter image: "+ err.message})

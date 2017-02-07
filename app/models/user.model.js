@@ -27,7 +27,21 @@ let userSchema = mongoose.Schema({
 
     password : String,
 
-    email : { type : String, unique : true }
+    email : { type : String, unique : true },
+
+    newComment: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'Trip'
+      }
+    ],
+
+    newLike: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'Trip'
+      }
+    ]
   },
 
   roles : { type : [String] }
@@ -43,7 +57,8 @@ userSchema.methods.generateHash = function(password) {
 
 // ### Check if password is valid
 userSchema.methods.validPassword = function(password) {
-
+  console.log(password);
+  console.log(this.local.password);
   return bcrypt.compareSync(password, this.local.password);
 };
 
