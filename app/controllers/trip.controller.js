@@ -96,6 +96,21 @@ export const likeOrDislike = (req, res, next) => {
   }
 };
 
+export const comment = (req,res,next) =>{
+  try{
+    let trip = req.trip;
+    let comment = new Comment(req.body)
+    trip.comments.push(comment)
+    //trip.
+    trip.save()
+      .then(updatedTrip => Trip.load(updatedTrip._id))
+      .then(updatedTrip => {req.trip = updatedTrip; next()})
+      .catch(err => res.status(400).json({message: "The Trip could not be commented on: "+ err.message}));
+  }catch(err){
+    res.status(500).json({message: err.message})
+  }
+}
+
 export const remove = (req,res,next) =>{
   try {
     Promise.all(req.trip.pois.map(poi=>poi.remove()))

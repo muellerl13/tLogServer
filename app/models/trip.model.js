@@ -36,6 +36,12 @@ const TripSchema = new Schema({
     }
   ],
   liked: Boolean,
+  comments: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: 'Comment'
+    }
+  ]
 });
 
 
