@@ -102,7 +102,7 @@ export const deleteImage = (req,res,next) =>{
   let ObjectID = mongoose.mongo.ObjectID;
   gfs.remove({_id: new ObjectID(id)}, function (err) {
     if (err){
-      console.log('error deleting')
+      console.log('error deleting');
      return handleError(err);}
     console.log('delete successful');
   });
@@ -155,7 +155,75 @@ export const filterImage = (req,res, next) => {
             message: "Could not filter image to and save it " + err.message
           }));
       });
+    }else if(req.body.filterType == "sepia"){
+      const stream = gm(gfs.createReadStream({_id: new ObjectID(id)})).modulate(115,0,100).colorize(7,21,50).stream().pipe(wStream);
+      stream.on('close', file => {
+        let poi = req.poi;
+        poi.images.push({
+          description: req.body.description,
+          id: file._id,
+          uploaded: Date.now(),
+          user: req.user.username
+        });
+        stream.on('error',  error => {
+          res.status(500).send({
+            message: "Could not save filtered image"
+          });
+        });
+        poi.save()
+          .then(poi => POI.load(poi._id))
+          .then(poi => res.json(poi))
+          .catch(err => res.status(500).send({
+            message: "Could not filter image to and save it " + err.message
+          }));
+      });
+    }else if(req.body.filterType == "warm"){
+      const stream = gm(gfs.createReadStream({_id: new ObjectID(id)})).colorize(0,50,50).stream().pipe(wStream);
+      stream.on('close', file => {
+        let poi = req.poi;
+        poi.images.push({
+          description: req.body.description,
+          id: file._id,
+          uploaded: Date.now(),
+          user: req.user.username
+        });
+        stream.on('error',  error => {
+          res.status(500).send({
+            message: "Could not save filtered image"
+          });
+        });
+        poi.save()
+          .then(poi => POI.load(poi._id))
+          .then(poi => res.json(poi))
+          .catch(err => res.status(500).send({
+            message: "Could not filter image to and save it " + err.message
+          }));
+      });
+    }else if(req.body.filterType == "cold"){
+      const stream = gm(gfs.createReadStream({_id: new ObjectID(id)})).colorize(50,0,0).stream().pipe(wStream);
+      stream.on('close', file => {
+        let poi = req.poi;
+        poi.images.push({
+          description: req.body.description,
+          id: file._id,
+          uploaded: Date.now(),
+          user: req.user.username
+        });
+        stream.on('error',  error => {
+          res.status(500).send({
+            message: "Could not save filtered image"
+          });
+        });
+        poi.save()
+          .then(poi => POI.load(poi._id))
+          .then(poi => res.json(poi))
+          .catch(err => res.status(500).send({
+            message: "Could not filter image to and save it " + err.message
+          }));
+      });
     }
+
+
     next()
 
   } catch (err){
