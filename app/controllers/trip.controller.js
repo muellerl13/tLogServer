@@ -39,6 +39,7 @@ export const list = (req,res,next) => {
 
 export const load = (req,res,next,id) =>{
   try {
+    console.log(id);
      Trip.load(id)
       .then((trip)=>{req.trip = trip; next()})
       .catch(err => res.status(400).json({message: `Could not load this Trip: ${err.message}`}))
