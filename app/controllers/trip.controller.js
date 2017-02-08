@@ -8,12 +8,6 @@ import Comment from '../models/comment.model'
 
 export const show = (req,res) => {
   try {
-    req.trip.liked = false;
-    for(let i = 0; i < req.trip.likes.length; i++){
-      if(String(req.trip.likes[i].userId) == String(req.user.id)){
-        req.trip.liked = true;
-      }
-    }
     res.json(req.trip);
   } catch(err) {res.status(500).json({message: `Could not send this Trip: ${err.message}`})}
 };
