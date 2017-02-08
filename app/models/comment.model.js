@@ -6,11 +6,7 @@ mongoose.Promise = global.Promise;
 let Schema = mongoose.Schema;
 
 const commentSchema = Schema({
-  creator: {
-    type: Schema.ObjectId,
-    required: true,
-    ref: 'User'
-  },
+  creator: String,
   createdAt: {
     type: Date,
     "default": Date.now
@@ -18,14 +14,12 @@ const commentSchema = Schema({
   content: String
 });
 
-commentSchema.path('creator').validate(function(creator) {
-  return creator != null;
-}, 'Creator must be specified');
+
 
 commentSchema.statics.load = function(id) {
   return this.findOne({
     _id: id
-  }).populate('creator','local.username');
+  });
 };
 
 export default mongoose.model('Comment',commentSchema);
