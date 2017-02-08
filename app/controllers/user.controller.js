@@ -12,7 +12,9 @@ export const update = (req,res,next) => {
       user.local.username = req.body.username;
       user.local.email = req.body.email;
       console.log(req.body.password);
-      user.local.password = user.generateHash(req.body.password);
+      if(req.body.password!=undefined){
+        user.local.password = user.generateHash(req.body.password);
+      }
       console.log(user);
       user.save()
         .then(user => User.findOne({
